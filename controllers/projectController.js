@@ -18,7 +18,7 @@ export const getAllProjects = async (req, res) => {
     const projects = await Project.find(filter)
       .sort({ createdAt: -1 })
       .lean();
-
+    res.set("Cache-Control", "public, max-age=60");
     res.json(projects);
   } catch (error) {
     console.error("Get projects error:", error);

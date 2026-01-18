@@ -12,6 +12,8 @@ import downloadRoutes from "./routes/downloadRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 import adminProjectRoutes from "./routes/adminProjectRoutes.js";
+import freeProjectRoutes from "./routes/freeProjectRoutes.js";
+import adminFreeProjectRoutes from "./routes/adminFreeProjectRoutes.js";
 
 console.log("MONGO_URI from env:", process.env.MONGO_URI?.slice(0, 40) + "...");
 const app = express();
@@ -64,6 +66,9 @@ app.use("/api/download", downloadRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
+app.use("/api/free-projects", freeProjectRoutes);
+app.use("/api/admin/free-projects", adminFreeProjectRoutes);
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
