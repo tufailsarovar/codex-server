@@ -2,37 +2,31 @@ import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    category: { type: String, required: true },
-    description: { type: String, required: true },
-
-    techStack: [{ type: String }],
-
-    // 🔥 MUST MATCH PAYLOAD EXACTLY
+    title: String,
+    category: String,
+    description: String,
+    techStack: [String],
     itemPrices: {
-      sourceCode: { type: Number, default: 0 },
-      ppt: { type: Number, default: 0 },
-      documentation: { type: Number, default: 0 },
+      sourceCode: Number,
+      ppt: Number,
+      documentation: Number,
     },
-
-    originalPrice: { type: Number, default: 0 },
-    price: { type: Number, default: 0 },
-
+    originalPrice: Number,
+    price: Number,
     screenshotUrl: String,
     livePreviewUrl: String,
-
     files: {
-      sourceCode: { type: String, default: "" },
-      ppt: { type: String, default: "" },
-      documentation: { type: String, default: "" },
-      fullBundle: { type: String, default: "" },
+      sourceCode: String,
+      ppt: String,
+      documentation: String,
+      fullBundle: String,
     },
   },
-  {
-    timestamps: true,
-    strict: true, // IMPORTANT
-  }
+  { timestamps: true }
 );
 
-const Project = mongoose.model("Project", projectSchema);
-export default Project;
+// ✅ INDEX (FIX)
+projectSchema.index({ createdAt: -1 });
+projectSchema.index({ category: 1 });
+
+export default mongoose.model("Project", projectSchema);

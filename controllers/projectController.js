@@ -6,9 +6,8 @@ import mongoose from "mongoose";
 ========================= */
 export const getAllProjects = async (req, res) => {
   try {
-    // ✅ prevent crash if DB not connected yet (serverless cold start)
     if (mongoose.connection.readyState !== 1) {
-      return res.json([]); // return empty list instead of 500
+      return res.json([]);
     }
 
     const { category } = req.query;
@@ -18,11 +17,12 @@ export const getAllProjects = async (req, res) => {
     const projects = await Project.find(filter)
       .sort({ createdAt: -1 })
       .lean();
+
     res.set("Cache-Control", "public, max-age=60");
     res.json(projects);
   } catch (error) {
-    console.error("Get projects error:", error);
-    res.json([]); // ✅ never throw 500 to frontend
+    console.error(error);
+    res.json([]);
   }
 };
 
@@ -35,21 +35,13 @@ export const getProjectById = async (req, res) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid project ID" });
-    }
-
-    const project = await Project.findById(id).lean();
-
+    const project = await Project.findById(req.params.id).lean();
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
 
     res.json(project);
   } catch (error) {
-    console.error("Get project error:", error);
     res.status(404).json({ message: "Project not found" });
   }
 };
@@ -62,8 +54,8 @@ export const createProject = async (req, res) => {
     const project = await Project.create(req.body);
     res.status(201).json(project);
   } catch (error) {
-    console.error("Create project error:", error);
-    res.status(500).json({ message: "Failed to create project" });
+    console.error(error);
+    res.status(500).json({ message: "Create project failed" });
   }
 };
 
@@ -106,8 +98,8 @@ export const updateProject = async (req, res) => {
 
     res.json(updatedProject);
   } catch (error) {
-    console.error("Update project error:", error);
-    res.status(500).json({ message: "Project update failed" });
+    console.error(error);
+    res.status(500).json({ message: "Update project failed" });
   }
 };
 
@@ -117,14 +109,12 @@ export const updateProject = async (req, res) => {
 export const deleteProject = async (req, res) => {
   try {
     const project = await Project.findByIdAndDelete(req.params.id);
-
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
-
     res.json({ message: "Project deleted successfully" });
   } catch (error) {
-    console.error("Delete project error:", error);
-    res.status(500).json({ message: "Failed to delete project" });
+    console.error(error);
+    res.status(500).json({ message: "Delete project failed" });
   }
 };
