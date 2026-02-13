@@ -13,7 +13,7 @@ const projectSchema = new mongoose.Schema(
     },
     originalPrice: Number,
     price: Number,
-    screenshotUrl: String,
+    videoUrl: String,
     livePreviewUrl: String,
     files: {
       sourceCode: String,
