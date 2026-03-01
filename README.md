@@ -51,13 +51,13 @@ VITE_EMAILJS_PUBLIC_KEY=aruhriguhvaiur
 ## ▶️ How to Run the Project
 
 Backend:
-Code:- https://github.com/tufailsarovar/codex-server
 ```
 npm install
 npm run dev
 ```
 
 Frontend:
+Code:- https://github.com/tufailsarovar/CodeX
 ```
 npm install
 npm run dev
