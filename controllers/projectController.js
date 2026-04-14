@@ -6,10 +6,6 @@ import mongoose from "mongoose";
 ========================= */
 export const getAllProjects = async (req, res) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json([]);
-    }
-
     const { category } = req.query;
     const filter = {};
     if (category) filter.category = category;
