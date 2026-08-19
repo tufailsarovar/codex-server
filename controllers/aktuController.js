@@ -44,7 +44,10 @@ export const getAktuResources = async (req, res) => {
 
     res.status(200).json(resources);
   } catch (error) {
-    console.error("Get AKTU resources error:", error);
+    console.error(
+      "Get AKTU resources error:",
+      error
+    );
 
     res.status(500).json({
       message: "Failed to load AKTU resources",
@@ -123,6 +126,7 @@ export const createAktuResource = async (req, res) => {
       title,
       description,
       content,
+      imageUrl,
       fileUrl,
       year,
       questionFrequency,
@@ -145,28 +149,54 @@ export const createAktuResource = async (req, res) => {
 
     const resource = await AktuResource.create({
       branch: branch.trim(),
+
       semester: Number(semester),
-      subjectCode: subjectCode?.trim() || "",
-      subjectName: subjectName.trim(),
+
+      subjectCode:
+        subjectCode?.trim() || "",
+
+      subjectName:
+        subjectName.trim(),
+
       resourceType,
-      unit: unit?.trim() || "",
-      title: title.trim(),
-      description: description?.trim() || "",
-      content: content || "",
-      fileUrl: fileUrl?.trim() || "",
+
+      unit:
+        unit?.trim() || "",
+
+      title:
+        title.trim(),
+
+      description:
+        description?.trim() || "",
+
+      content:
+        content || "",
+
+      // RESOURCE IMAGE
+      imageUrl:
+        imageUrl?.trim() || "",
+
+      // RESOURCE FILE / PDF
+      fileUrl:
+        fileUrl?.trim() || "",
+
       year:
         year !== undefined &&
         year !== null &&
         year !== ""
           ? Number(year)
           : null,
+
       questionFrequency:
         questionFrequency !== undefined &&
         questionFrequency !== null &&
         questionFrequency !== ""
           ? Number(questionFrequency)
           : 0,
-      priority: priority || "normal",
+
+      priority:
+        priority || "normal",
+
       isPublished:
         typeof isPublished === "boolean"
           ? isPublished
@@ -181,7 +211,8 @@ export const createAktuResource = async (req, res) => {
     );
 
     res.status(500).json({
-      message: "Failed to create AKTU resource",
+      message:
+        "Failed to create AKTU resource",
     });
   }
 };
@@ -190,15 +221,20 @@ export const createAktuResource = async (req, res) => {
    ADMIN — UPDATE RESOURCE
 ========================= */
 
-export const updateAktuResource = async (req, res) => {
+export const updateAktuResource = async (
+  req,
+  res
+) => {
   try {
-    const resource = await AktuResource.findById(
-      req.params.id
-    );
+    const resource =
+      await AktuResource.findById(
+        req.params.id
+      );
 
     if (!resource) {
       return res.status(404).json({
-        message: "AKTU resource not found",
+        message:
+          "AKTU resource not found",
       });
     }
 
@@ -212,6 +248,7 @@ export const updateAktuResource = async (req, res) => {
       title,
       description,
       content,
+      imageUrl,
       fileUrl,
       year,
       questionFrequency,
@@ -219,69 +256,120 @@ export const updateAktuResource = async (req, res) => {
       isPublished,
     } = req.body;
 
+    /* BRANCH */
+
     if (branch !== undefined) {
-      resource.branch = branch.trim();
+      resource.branch =
+        branch.trim();
     }
 
+    /* SEMESTER */
+
     if (semester !== undefined) {
-      resource.semester = Number(semester);
+      resource.semester =
+        Number(semester);
     }
+
+    /* SUBJECT CODE */
 
     if (subjectCode !== undefined) {
       resource.subjectCode =
         subjectCode?.trim() || "";
     }
 
+    /* SUBJECT NAME */
+
     if (subjectName !== undefined) {
-      resource.subjectName = subjectName.trim();
+      resource.subjectName =
+        subjectName.trim();
     }
+
+    /* RESOURCE TYPE */
 
     if (resourceType !== undefined) {
-      resource.resourceType = resourceType;
+      resource.resourceType =
+        resourceType;
     }
+
+    /* UNIT */
 
     if (unit !== undefined) {
-      resource.unit = unit?.trim() || "";
+      resource.unit =
+        unit?.trim() || "";
     }
 
+    /* TITLE */
+
     if (title !== undefined) {
-      resource.title = title.trim();
+      resource.title =
+        title.trim();
     }
+
+    /* DESCRIPTION */
 
     if (description !== undefined) {
       resource.description =
         description?.trim() || "";
     }
 
+    /* CONTENT */
+
     if (content !== undefined) {
-      resource.content = content || "";
+      resource.content =
+        content || "";
     }
 
-    if (fileUrl !== undefined) {
-      resource.fileUrl = fileUrl?.trim() || "";
+    /* IMAGE URL */
+
+    if (imageUrl !== undefined) {
+      resource.imageUrl =
+        imageUrl?.trim() || "";
     }
+
+    /* FILE URL */
+
+    if (fileUrl !== undefined) {
+      resource.fileUrl =
+        fileUrl?.trim() || "";
+    }
+
+    /* YEAR */
 
     if (year !== undefined) {
       resource.year =
-        year === "" || year === null
+        year === "" ||
+        year === null
           ? null
           : Number(year);
     }
 
-    if (questionFrequency !== undefined) {
+    /* QUESTION FREQUENCY */
+
+    if (
+      questionFrequency !==
+      undefined
+    ) {
       resource.questionFrequency =
         questionFrequency === "" ||
         questionFrequency === null
           ? 0
-          : Number(questionFrequency);
+          : Number(
+              questionFrequency
+            );
     }
+
+    /* PRIORITY */
 
     if (priority !== undefined) {
-      resource.priority = priority;
+      resource.priority =
+        priority;
     }
 
+    /* PUBLISHED */
+
     if (isPublished !== undefined) {
-      resource.isPublished = Boolean(isPublished);
+      resource.isPublished =
+        Boolean(isPublished);
     }
 
     await resource.save();
@@ -294,7 +382,8 @@ export const updateAktuResource = async (req, res) => {
     );
 
     res.status(500).json({
-      message: "Failed to update AKTU resource",
+      message:
+        "Failed to update AKTU resource",
     });
   }
 };
@@ -303,22 +392,28 @@ export const updateAktuResource = async (req, res) => {
    ADMIN — DELETE RESOURCE
 ========================= */
 
-export const deleteAktuResource = async (req, res) => {
+export const deleteAktuResource = async (
+  req,
+  res
+) => {
   try {
-    const resource = await AktuResource.findById(
-      req.params.id
-    );
+    const resource =
+      await AktuResource.findById(
+        req.params.id
+      );
 
     if (!resource) {
       return res.status(404).json({
-        message: "AKTU resource not found",
+        message:
+          "AKTU resource not found",
       });
     }
 
     await resource.deleteOne();
 
     res.status(200).json({
-      message: "AKTU resource deleted successfully",
+      message:
+        "AKTU resource deleted successfully",
     });
   } catch (error) {
     console.error(
@@ -327,7 +422,8 @@ export const deleteAktuResource = async (req, res) => {
     );
 
     res.status(500).json({
-      message: "Failed to delete AKTU resource",
+      message:
+        "Failed to delete AKTU resource",
     });
   }
 };
