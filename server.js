@@ -14,6 +14,7 @@ import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 import adminProjectRoutes from "./routes/adminProjectRoutes.js";
 import freeProjectRoutes from "./routes/freeProjectRoutes.js";
 import adminFreeProjectRoutes from "./routes/adminFreeProjectRoutes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 
 // AKTU routes
 import aktuRoutes from "./routes/aktuRoutes.js";
@@ -73,6 +74,7 @@ app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/free-projects", freeProjectRoutes);
 app.use("/api/admin/free-projects", adminFreeProjectRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // AKTU Routes
 app.use("/api/aktu", aktuRoutes);
