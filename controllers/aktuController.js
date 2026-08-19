@@ -1,4 +1,4 @@
-import AktuResource from "../models/AktuResource.js";
+import AktuResource from "../models/AKTUResource.js";
 
 /* =========================
    PUBLIC — GET AKTU RESOURCES
