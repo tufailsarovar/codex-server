@@ -63,13 +63,28 @@ const aktuResourceSchema = new mongoose.Schema(
       default: "",
     },
 
+    // Cloudinary image
     imageUrl: {
       type: String,
       default: "",
       trim: true,
     },
 
+    // Cloudinary PDF/file
     fileUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // Cloudinary public IDs
+    imagePublicId: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    filePublicId: {
       type: String,
       default: "",
       trim: true,

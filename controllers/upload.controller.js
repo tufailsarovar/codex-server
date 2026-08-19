@@ -42,16 +42,28 @@ export const uploadAktuImage = async (
         {
           folder:
             "projectcodex/aktu/images",
+
           resource_type: "image",
+
+          use_filename: true,
+
+          unique_filename: true,
+
+          type: "upload",
         }
       );
 
     return res.status(200).json({
       message:
         "Image uploaded successfully.",
+
       url: result.secure_url,
-      public_id: result.public_id,
-      resource_type: "image",
+
+      public_id:
+        result.public_id,
+
+      resource_type:
+        result.resource_type,
     });
   } catch (error) {
     console.error(
@@ -115,12 +127,14 @@ export const uploadAktuPdf = async (
       message:
         "PDF uploaded successfully.",
 
-      url: result.secure_url,
+      url:
+        result.secure_url,
 
       public_id:
         result.public_id,
 
-      resource_type: "raw",
+      resource_type:
+        "raw",
 
       original_filename:
         req.file.originalname,

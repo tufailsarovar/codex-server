@@ -1,7 +1,7 @@
 import AktuResource from "../models/AKTUResource.js";
 
 /* =========================
-   PUBLIC — GET RESOURCES
+   PUBLIC — GET AKTU RESOURCES
 ========================= */
 
 export const getAktuResources = async (req, res) => {
@@ -9,11 +9,8 @@ export const getAktuResources = async (req, res) => {
     const {
       branch,
       semester,
-      subjectCode,
-      subjectName,
       resourceType,
-      unit,
-      title,
+      subjectName,
     } = req.query;
 
     const filter = {
@@ -28,27 +25,12 @@ export const getAktuResources = async (req, res) => {
       filter.semester = Number(semester);
     }
 
-    if (subjectCode) {
-      filter.subjectCode = subjectCode;
-    }
-
-    if (subjectName) {
-      filter.subjectName = subjectName;
-    }
-
     if (resourceType) {
       filter.resourceType = resourceType;
     }
 
-    if (unit) {
-      filter.unit = unit;
-    }
-
-    if (title) {
-      filter.title = {
-        $regex: title,
-        $options: "i",
-      };
+    if (subjectName) {
+      filter.subjectName = subjectName;
     }
 
     const resources = await AktuResource.find(filter)
@@ -62,10 +44,7 @@ export const getAktuResources = async (req, res) => {
 
     res.status(200).json(resources);
   } catch (error) {
-    console.error(
-      "Get AKTU resources error:",
-      error
-    );
+    console.error("Get AKTU resources error:", error);
 
     res.status(500).json({
       message: "Failed to load AKTU resources",
@@ -74,7 +53,7 @@ export const getAktuResources = async (req, res) => {
 };
 
 /* =========================
-   PUBLIC — SINGLE RESOURCE
+   PUBLIC — GET SINGLE RESOURCE
 ========================= */
 
 export const getAktuResourceById = async (req, res) => {
@@ -93,7 +72,7 @@ export const getAktuResourceById = async (req, res) => {
     res.status(200).json(resource);
   } catch (error) {
     console.error(
-      "Get AKTU resource error:",
+      "Get AKTU resource by ID error:",
       error
     );
 
@@ -104,13 +83,10 @@ export const getAktuResourceById = async (req, res) => {
 };
 
 /* =========================
-   ADMIN — GET ALL
+   ADMIN — GET ALL RESOURCES
 ========================= */
 
-export const getAllAktuResources = async (
-  req,
-  res
-) => {
+export const getAllAktuResources = async (req, res) => {
   try {
     const resources = await AktuResource.find({})
       .sort({
@@ -132,13 +108,10 @@ export const getAllAktuResources = async (
 };
 
 /* =========================
-   ADMIN — CREATE
+   ADMIN — CREATE RESOURCE
 ========================= */
 
-export const createAktuResource = async (
-  req,
-  res
-) => {
+export const createAktuResource = async (req, res) => {
   try {
     const {
       branch,
@@ -152,6 +125,8 @@ export const createAktuResource = async (
       content,
       imageUrl,
       fileUrl,
+      imagePublicId,
+      filePublicId,
       year,
       questionFrequency,
       priority,
@@ -171,59 +146,65 @@ export const createAktuResource = async (
       });
     }
 
-    const resource =
-      await AktuResource.create({
-        branch: branch.trim(),
+    const resource = await AktuResource.create({
+      branch: branch.trim(),
 
-        semester: Number(semester),
+      semester: Number(semester),
 
-        subjectCode:
-          subjectCode?.trim() || "",
+      subjectCode:
+        subjectCode?.trim() || "",
 
-        subjectName:
-          subjectName.trim(),
+      subjectName:
+        subjectName.trim(),
 
-        resourceType,
+      resourceType,
 
-        unit: unit?.trim() || "",
+      unit:
+        unit?.trim() || "",
 
-        title: title.trim(),
+      title:
+        title.trim(),
 
-        description:
-          description?.trim() || "",
+      description:
+        description?.trim() || "",
 
-        content: content || "",
+      content:
+        content || "",
 
-        imageUrl:
-          imageUrl?.trim() || "",
+      imageUrl:
+        imageUrl?.trim() || "",
 
-        fileUrl:
-          fileUrl?.trim() || "",
+      fileUrl:
+        fileUrl?.trim() || "",
 
-        year:
-          year !== undefined &&
-          year !== null &&
-          year !== ""
-            ? Number(year)
-            : null,
+      imagePublicId:
+        imagePublicId?.trim() || "",
 
-        questionFrequency:
-          questionFrequency !==
-            undefined &&
-          questionFrequency !== null &&
-          questionFrequency !== ""
-            ? Number(questionFrequency)
-            : 0,
+      filePublicId:
+        filePublicId?.trim() || "",
 
-        priority:
-          priority || "normal",
+      year:
+        year !== undefined &&
+        year !== null &&
+        year !== ""
+          ? Number(year)
+          : null,
 
-        isPublished:
-          typeof isPublished ===
-          "boolean"
-            ? isPublished
-            : true,
-      });
+      questionFrequency:
+        questionFrequency !== undefined &&
+        questionFrequency !== null &&
+        questionFrequency !== ""
+          ? Number(questionFrequency)
+          : 0,
+
+      priority:
+        priority || "normal",
+
+      isPublished:
+        typeof isPublished === "boolean"
+          ? isPublished
+          : true,
+    });
 
     res.status(201).json(resource);
   } catch (error) {
@@ -233,24 +214,21 @@ export const createAktuResource = async (
     );
 
     res.status(500).json({
-      message: "Failed to create AKTU resource",
+      message:
+        error.message ||
+        "Failed to create AKTU resource",
     });
   }
 };
 
 /* =========================
-   ADMIN — UPDATE
+   ADMIN — UPDATE RESOURCE
 ========================= */
 
-export const updateAktuResource = async (
-  req,
-  res
-) => {
+export const updateAktuResource = async (req, res) => {
   try {
     const resource =
-      await AktuResource.findById(
-        req.params.id
-      );
+      await AktuResource.findById(req.params.id);
 
     if (!resource) {
       return res.status(404).json({
@@ -270,6 +248,8 @@ export const updateAktuResource = async (
       content,
       imageUrl,
       fileUrl,
+      imagePublicId,
+      filePublicId,
       year,
       questionFrequency,
       priority,
@@ -331,6 +311,16 @@ export const updateAktuResource = async (
         fileUrl?.trim() || "";
     }
 
+    if (imagePublicId !== undefined) {
+      resource.imagePublicId =
+        imagePublicId?.trim() || "";
+    }
+
+    if (filePublicId !== undefined) {
+      resource.filePublicId =
+        filePublicId?.trim() || "";
+    }
+
     if (year !== undefined) {
       resource.year =
         year === "" || year === null
@@ -338,10 +328,7 @@ export const updateAktuResource = async (
           : Number(year);
     }
 
-    if (
-      questionFrequency !==
-      undefined
-    ) {
+    if (questionFrequency !== undefined) {
       resource.questionFrequency =
         questionFrequency === "" ||
         questionFrequency === null
@@ -369,24 +356,21 @@ export const updateAktuResource = async (
     );
 
     res.status(500).json({
-      message: "Failed to update AKTU resource",
+      message:
+        error.message ||
+        "Failed to update AKTU resource",
     });
   }
 };
 
 /* =========================
-   ADMIN — DELETE
+   ADMIN — DELETE RESOURCE
 ========================= */
 
-export const deleteAktuResource = async (
-  req,
-  res
-) => {
+export const deleteAktuResource = async (req, res) => {
   try {
     const resource =
-      await AktuResource.findById(
-        req.params.id
-      );
+      await AktuResource.findById(req.params.id);
 
     if (!resource) {
       return res.status(404).json({
