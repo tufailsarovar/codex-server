@@ -1,7 +1,7 @@
 import AktuResource from "../models/AKTUResource.js";
 
 /* =========================
-   PUBLIC — GET AKTU RESOURCES
+   PUBLIC — GET RESOURCES
 ========================= */
 
 export const getAktuResources = async (req, res) => {
@@ -9,8 +9,11 @@ export const getAktuResources = async (req, res) => {
     const {
       branch,
       semester,
-      resourceType,
+      subjectCode,
       subjectName,
+      resourceType,
+      unit,
+      title,
     } = req.query;
 
     const filter = {
@@ -25,12 +28,27 @@ export const getAktuResources = async (req, res) => {
       filter.semester = Number(semester);
     }
 
-    if (resourceType) {
-      filter.resourceType = resourceType;
+    if (subjectCode) {
+      filter.subjectCode = subjectCode;
     }
 
     if (subjectName) {
       filter.subjectName = subjectName;
+    }
+
+    if (resourceType) {
+      filter.resourceType = resourceType;
+    }
+
+    if (unit) {
+      filter.unit = unit;
+    }
+
+    if (title) {
+      filter.title = {
+        $regex: title,
+        $options: "i",
+      };
     }
 
     const resources = await AktuResource.find(filter)
@@ -56,7 +74,7 @@ export const getAktuResources = async (req, res) => {
 };
 
 /* =========================
-   PUBLIC — GET SINGLE RESOURCE
+   PUBLIC — SINGLE RESOURCE
 ========================= */
 
 export const getAktuResourceById = async (req, res) => {
@@ -75,7 +93,7 @@ export const getAktuResourceById = async (req, res) => {
     res.status(200).json(resource);
   } catch (error) {
     console.error(
-      "Get AKTU resource by ID error:",
+      "Get AKTU resource error:",
       error
     );
 
@@ -86,10 +104,13 @@ export const getAktuResourceById = async (req, res) => {
 };
 
 /* =========================
-   ADMIN — GET ALL RESOURCES
+   ADMIN — GET ALL
 ========================= */
 
-export const getAllAktuResources = async (req, res) => {
+export const getAllAktuResources = async (
+  req,
+  res
+) => {
   try {
     const resources = await AktuResource.find({})
       .sort({
@@ -111,10 +132,13 @@ export const getAllAktuResources = async (req, res) => {
 };
 
 /* =========================
-   ADMIN — CREATE RESOURCE
+   ADMIN — CREATE
 ========================= */
 
-export const createAktuResource = async (req, res) => {
+export const createAktuResource = async (
+  req,
+  res
+) => {
   try {
     const {
       branch,
@@ -147,61 +171,59 @@ export const createAktuResource = async (req, res) => {
       });
     }
 
-    const resource = await AktuResource.create({
-      branch: branch.trim(),
+    const resource =
+      await AktuResource.create({
+        branch: branch.trim(),
 
-      semester: Number(semester),
+        semester: Number(semester),
 
-      subjectCode:
-        subjectCode?.trim() || "",
+        subjectCode:
+          subjectCode?.trim() || "",
 
-      subjectName:
-        subjectName.trim(),
+        subjectName:
+          subjectName.trim(),
 
-      resourceType,
+        resourceType,
 
-      unit:
-        unit?.trim() || "",
+        unit: unit?.trim() || "",
 
-      title:
-        title.trim(),
+        title: title.trim(),
 
-      description:
-        description?.trim() || "",
+        description:
+          description?.trim() || "",
 
-      content:
-        content || "",
+        content: content || "",
 
-      // RESOURCE IMAGE
-      imageUrl:
-        imageUrl?.trim() || "",
+        imageUrl:
+          imageUrl?.trim() || "",
 
-      // RESOURCE FILE / PDF
-      fileUrl:
-        fileUrl?.trim() || "",
+        fileUrl:
+          fileUrl?.trim() || "",
 
-      year:
-        year !== undefined &&
-        year !== null &&
-        year !== ""
-          ? Number(year)
-          : null,
+        year:
+          year !== undefined &&
+          year !== null &&
+          year !== ""
+            ? Number(year)
+            : null,
 
-      questionFrequency:
-        questionFrequency !== undefined &&
-        questionFrequency !== null &&
-        questionFrequency !== ""
-          ? Number(questionFrequency)
-          : 0,
+        questionFrequency:
+          questionFrequency !==
+            undefined &&
+          questionFrequency !== null &&
+          questionFrequency !== ""
+            ? Number(questionFrequency)
+            : 0,
 
-      priority:
-        priority || "normal",
+        priority:
+          priority || "normal",
 
-      isPublished:
-        typeof isPublished === "boolean"
-          ? isPublished
-          : true,
-    });
+        isPublished:
+          typeof isPublished ===
+          "boolean"
+            ? isPublished
+            : true,
+      });
 
     res.status(201).json(resource);
   } catch (error) {
@@ -211,14 +233,13 @@ export const createAktuResource = async (req, res) => {
     );
 
     res.status(500).json({
-      message:
-        "Failed to create AKTU resource",
+      message: "Failed to create AKTU resource",
     });
   }
 };
 
 /* =========================
-   ADMIN — UPDATE RESOURCE
+   ADMIN — UPDATE
 ========================= */
 
 export const updateAktuResource = async (
@@ -233,8 +254,7 @@ export const updateAktuResource = async (
 
     if (!resource) {
       return res.status(404).json({
-        message:
-          "AKTU resource not found",
+        message: "AKTU resource not found",
       });
     }
 
@@ -256,94 +276,67 @@ export const updateAktuResource = async (
       isPublished,
     } = req.body;
 
-    /* BRANCH */
-
     if (branch !== undefined) {
       resource.branch =
         branch.trim();
     }
-
-    /* SEMESTER */
 
     if (semester !== undefined) {
       resource.semester =
         Number(semester);
     }
 
-    /* SUBJECT CODE */
-
     if (subjectCode !== undefined) {
       resource.subjectCode =
         subjectCode?.trim() || "";
     }
-
-    /* SUBJECT NAME */
 
     if (subjectName !== undefined) {
       resource.subjectName =
         subjectName.trim();
     }
 
-    /* RESOURCE TYPE */
-
     if (resourceType !== undefined) {
       resource.resourceType =
         resourceType;
     }
-
-    /* UNIT */
 
     if (unit !== undefined) {
       resource.unit =
         unit?.trim() || "";
     }
 
-    /* TITLE */
-
     if (title !== undefined) {
       resource.title =
         title.trim();
     }
-
-    /* DESCRIPTION */
 
     if (description !== undefined) {
       resource.description =
         description?.trim() || "";
     }
 
-    /* CONTENT */
-
     if (content !== undefined) {
       resource.content =
         content || "";
     }
-
-    /* IMAGE URL */
 
     if (imageUrl !== undefined) {
       resource.imageUrl =
         imageUrl?.trim() || "";
     }
 
-    /* FILE URL */
-
     if (fileUrl !== undefined) {
       resource.fileUrl =
         fileUrl?.trim() || "";
     }
 
-    /* YEAR */
-
     if (year !== undefined) {
       resource.year =
-        year === "" ||
-        year === null
+        year === "" || year === null
           ? null
           : Number(year);
     }
-
-    /* QUESTION FREQUENCY */
 
     if (
       questionFrequency !==
@@ -353,19 +346,13 @@ export const updateAktuResource = async (
         questionFrequency === "" ||
         questionFrequency === null
           ? 0
-          : Number(
-              questionFrequency
-            );
+          : Number(questionFrequency);
     }
-
-    /* PRIORITY */
 
     if (priority !== undefined) {
       resource.priority =
         priority;
     }
-
-    /* PUBLISHED */
 
     if (isPublished !== undefined) {
       resource.isPublished =
@@ -382,14 +369,13 @@ export const updateAktuResource = async (
     );
 
     res.status(500).json({
-      message:
-        "Failed to update AKTU resource",
+      message: "Failed to update AKTU resource",
     });
   }
 };
 
 /* =========================
-   ADMIN — DELETE RESOURCE
+   ADMIN — DELETE
 ========================= */
 
 export const deleteAktuResource = async (
@@ -404,8 +390,7 @@ export const deleteAktuResource = async (
 
     if (!resource) {
       return res.status(404).json({
-        message:
-          "AKTU resource not found",
+        message: "AKTU resource not found",
       });
     }
 

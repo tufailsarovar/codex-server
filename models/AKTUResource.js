@@ -63,7 +63,6 @@ const aktuResourceSchema = new mongoose.Schema(
       default: "",
     },
 
-    // NEW
     imageUrl: {
       type: String,
       default: "",
@@ -89,11 +88,7 @@ const aktuResourceSchema = new mongoose.Schema(
 
     priority: {
       type: String,
-      enum: [
-        "normal",
-        "important",
-        "very-important",
-      ],
+      enum: ["normal", "important", "very-important"],
       default: "normal",
     },
 
