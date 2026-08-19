@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import cors from "cors";
 import express from "express";
 import { connectDB } from "../config/db.js";
@@ -14,12 +15,16 @@ import adminProjectRoutes from "../routes/adminProjectRoutes.js";
 import freeProjectRoutes from "../routes/freeProjectRoutes.js";
 import adminFreeProjectRoutes from "../routes/adminFreeProjectRoutes.js";
 
+/* AKTU ROUTES */
+import aktuRoutes from "../routes/aktuRoutes.js";
+import adminAktuRoutes from "../routes/adminAktuRoutes.js";
+
 const app = express();
 
-// DB
+/* DB */
 connectDB();
 
-// Middleware
+/* Middleware */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -33,8 +38,14 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
       return callback(null, false);
     },
     credentials: true,
@@ -43,16 +54,19 @@ app.use(
 
 app.options("*", cors());
 
-// ✅ HEALTH CHECK (FIX)
+/* HEALTH CHECK */
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-// Routes
+/* ROOT */
 app.get("/", (req, res) => {
-  res.json({ message: "CodeX API running" });
+  res.json({
+    message: "CodeX API running",
+  });
 });
 
+/* EXISTING ROUTES */
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/orders", orderRoutes);
@@ -61,10 +75,22 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/free-projects", freeProjectRoutes);
-app.use("/api/admin/free-projects", adminFreeProjectRoutes);
+app.use(
+  "/api/admin/free-projects",
+  adminFreeProjectRoutes
+);
 
+/* AKTU ROUTES */
+app.use("/api/aktu", aktuRoutes);
+app.use("/api/admin/aktu", adminAktuRoutes);
+
+/* ERROR HANDLER */
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: "Server error" });
+  console.error(err);
+
+  res.status(500).json({
+    message: "Server error",
+  });
 });
 
 export default app;

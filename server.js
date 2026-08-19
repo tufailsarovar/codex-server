@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import cors from "cors";
 import express from "express";
 import { connectDB } from "./config/db.js";
@@ -13,6 +14,10 @@ import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 import adminProjectRoutes from "./routes/adminProjectRoutes.js";
 import freeProjectRoutes from "./routes/freeProjectRoutes.js";
 import adminFreeProjectRoutes from "./routes/adminFreeProjectRoutes.js";
+
+// AKTU routes
+import aktuRoutes from "./routes/aktuRoutes.js";
+import adminAktuRoutes from "./routes/adminAktuRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,7 +40,11 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
       return callback(null, false);
     },
     credentials: true,
@@ -44,16 +53,17 @@ app.use(
 
 app.options("*", cors());
 
-// ✅ HEALTH CHECK (FIX)
+// HEALTH CHECK
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-// Routes
+// Root
 app.get("/", (req, res) => {
   res.json({ message: "CodeX API running" });
 });
 
+// Existing Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/orders", orderRoutes);
@@ -64,8 +74,17 @@ app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/free-projects", freeProjectRoutes);
 app.use("/api/admin/free-projects", adminFreeProjectRoutes);
 
+// AKTU Routes
+app.use("/api/aktu", aktuRoutes);
+app.use("/api/admin/aktu", adminAktuRoutes);
+
+// Error Handler
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: "Server error" });
+  console.error(err);
+
+  res.status(500).json({
+    message: "Server error",
+  });
 });
 
 export default app;
