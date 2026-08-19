@@ -1,8 +1,11 @@
 import express from "express";
 
-import upload from "../middlewares/upload.middleware.js";
+import upload from "../middleware/upload.middleware.js";
 
-import adminAuth from "../middlewares/adminAuth.middleware.js";
+import {
+  protect,
+  adminOnly,
+} from "../middleware/authMiddleware.js";
 
 import {
   uploadAktuImage,
@@ -12,23 +15,25 @@ import {
 const router = express.Router();
 
 /* =========================
-   AKTU IMAGE
+   AKTU IMAGE UPLOAD
 ========================= */
 
 router.post(
   "/aktu/image",
-  adminAuth,
+  protect,
+  adminOnly,
   upload.single("image"),
   uploadAktuImage
 );
 
 /* =========================
-   AKTU PDF
+   AKTU PDF UPLOAD
 ========================= */
 
 router.post(
   "/aktu/pdf",
-  adminAuth,
+  protect,
+  adminOnly,
   upload.single("pdf"),
   uploadAktuPdf
 );
