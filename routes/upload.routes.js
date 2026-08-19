@@ -14,11 +14,6 @@ import {
 
 const router = express.Router();
 
-/* =====================================================
-   AKTU IMAGE UPLOAD
-   POST /api/upload/aktu/image
-===================================================== */
-
 router.post(
   "/aktu/image",
   protect,
@@ -26,11 +21,6 @@ router.post(
   upload.single("image"),
   uploadAktuImage
 );
-
-/* =====================================================
-   AKTU PDF UPLOAD
-   POST /api/upload/aktu/pdf
-===================================================== */
 
 router.post(
   "/aktu/pdf",
