@@ -2,29 +2,21 @@ import mongoose from "mongoose";
 
 const aktuResourceSchema = new mongoose.Schema(
   {
+    // =====================================================
+    // BASIC INFORMATION
+    // =====================================================
+
     branch: {
       type: String,
       required: true,
       trim: true,
     },
 
-    semester: {
+    academicYear: {
       type: Number,
       required: true,
       min: 1,
-      max: 8,
-    },
-
-    subjectCode: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    subjectName: {
-      type: String,
-      required: true,
-      trim: true,
+      max: 4,
     },
 
     resourceType: {
@@ -40,17 +32,30 @@ const aktuResourceSchema = new mongoose.Schema(
       ],
     },
 
+    // =====================================================
+    // UNIT
+    //
+    // Used only for paid resources.
+    // Example:
+    // Unit 1
+    // Unit 2
+    // =====================================================
+
     unit: {
       type: String,
-      trim: true,
       default: "",
+      trim: true,
     },
 
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    // =====================================================
+    // DESCRIPTION
+    //
+    // Syllabus:
+    // optional short description
+    //
+    // Paid:
+    // unit name / description
+    // =====================================================
 
     description: {
       type: String,
@@ -58,54 +63,62 @@ const aktuResourceSchema = new mongoose.Schema(
       trim: true,
     },
 
-    content: {
-      type: String,
-      default: "",
-    },
+    // =====================================================
+    // FRONT PAGE IMAGE
+    //
+    // Used only for paid resources.
+    // Google Drive image URL.
+    // =====================================================
 
-    // Cloudinary image
     imageUrl: {
       type: String,
       default: "",
       trim: true,
     },
 
-    // Cloudinary PDF/file
+    // =====================================================
+    // PDF
+    //
+    // Google Drive PDF URL.
+    // =====================================================
+
     fileUrl: {
       type: String,
-      default: "",
+      required: true,
       trim: true,
     },
 
-    // Cloudinary public IDs
-    imagePublicId: {
+    // =====================================================
+    // ACCESS TYPE
+    //
+    // Syllabus = ALWAYS free
+    //
+    // All other resource types = paid
+    // =====================================================
+
+    accessType: {
       type: String,
-      default: "",
-      trim: true,
+      enum: ["free", "paid"],
+      default: "free",
     },
 
-    filePublicId: {
-      type: String,
-      default: "",
-      trim: true,
-    },
+    // =====================================================
+    // PRICE
+    //
+    // Syllabus = ALWAYS 0
+    //
+    // Paid resources = greater than 0
+    // =====================================================
 
-    year: {
-      type: Number,
-      default: null,
-    },
-
-    questionFrequency: {
+    price: {
       type: Number,
       default: 0,
       min: 0,
     },
 
-    priority: {
-      type: String,
-      enum: ["normal", "important", "very-important"],
-      default: "normal",
-    },
+    // =====================================================
+    // PUBLISH
+    // =====================================================
 
     isPublished: {
       type: Boolean,
@@ -117,21 +130,154 @@ const aktuResourceSchema = new mongoose.Schema(
   }
 );
 
+// =========================================================
+// NORMALIZE ACCESS / PRICE BEFORE SAVE
+// =========================================================
+
+aktuResourceSchema.pre(
+  "save",
+  function (next) {
+    /*
+     * Syllabus is always free.
+     */
+    if (
+      this.resourceType ===
+      "syllabus"
+    ) {
+      this.accessType =
+        "free";
+
+      this.price = 0;
+
+      this.unit = "";
+
+      this.imageUrl = "";
+    } else {
+      /*
+       * Every other AKTU resource is paid.
+       */
+      this.accessType =
+        "paid";
+
+      /*
+       * Paid resources must have
+       * a positive price.
+       */
+      if (
+        !Number.isFinite(
+          Number(this.price)
+        ) ||
+        Number(this.price) <= 0
+      ) {
+        return next(
+          new Error(
+            "Paid AKTU resources must have a price greater than 0."
+          )
+        );
+      }
+    }
+
+    next();
+  }
+);
+
+// =========================================================
+// VALIDATION FOR UPDATE OPERATIONS
+// =========================================================
+
+aktuResourceSchema.pre(
+  "findOneAndUpdate",
+  function (next) {
+    const update =
+      this.getUpdate() || {};
+
+    /*
+     * Handle MongoDB $set updates.
+     */
+    const data =
+      update.$set || update;
+
+    /*
+     * If resource type is explicitly
+     * being changed to syllabus.
+     */
+    if (
+      data.resourceType ===
+      "syllabus"
+    ) {
+      if (update.$set) {
+        update.$set.accessType =
+          "free";
+
+        update.$set.price = 0;
+
+        update.$set.unit = "";
+
+        update.$set.imageUrl = "";
+      } else {
+        update.accessType =
+          "free";
+
+        update.price = 0;
+
+        update.unit = "";
+
+        update.imageUrl = "";
+      }
+    }
+
+    /*
+     * If a non-syllabus resource is
+     * being updated and price exists,
+     * force paid access.
+     */
+    if (
+      data.resourceType &&
+      data.resourceType !==
+        "syllabus"
+    ) {
+      if (update.$set) {
+        update.$set.accessType =
+          "paid";
+      } else {
+        update.accessType =
+          "paid";
+      }
+    }
+
+    this.setUpdate(update);
+
+    next();
+  }
+);
+
+// =========================================================
+// INDEXES
+// =========================================================
+
 aktuResourceSchema.index({
   branch: 1,
-  semester: 1,
+  academicYear: 1,
   resourceType: 1,
 });
 
 aktuResourceSchema.index({
-  branch: 1,
-  semester: 1,
-  subjectName: 1,
+  resourceType: 1,
+  isPublished: 1,
+});
+
+aktuResourceSchema.index({
+  accessType: 1,
+  isPublished: 1,
 });
 
 aktuResourceSchema.index({
   createdAt: -1,
 });
+
+// =========================================================
+// MODEL
+// =========================================================
 
 export default mongoose.model(
   "AktuResource",

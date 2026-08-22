@@ -3,7 +3,9 @@ dotenv.config();
 
 import cors from "cors";
 import express from "express";
+
 import { connectDB } from "./config/db.js";
+
 import {
   testCloudinaryConnection,
 } from "./config/cloudinary.js";
@@ -22,8 +24,10 @@ import uploadRoutes from "./routes/upload.routes.js";
 // AKTU routes
 import aktuRoutes from "./routes/aktuRoutes.js";
 import adminAktuRoutes from "./routes/adminAktuRoutes.js";
+import aktuPaymentRoutes from "./routes/aktuPaymentRoutes.js";
 
 const app = express();
+
 const PORT = process.env.PORT || 5000;
 
 // =========================
@@ -46,7 +50,12 @@ connectDB()
 // =========================
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -62,12 +71,15 @@ app.use(
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin)) {
+      if (
+        allowedOrigins.includes(origin)
+      ) {
         return callback(null, true);
       }
 
       return callback(null, false);
     },
+
     credentials: true,
   })
 );
@@ -134,7 +146,10 @@ app.get("/", (req, res) => {
 // EXISTING ROUTES
 // =========================
 
-app.use("/api/auth", authRoutes);
+app.use(
+  "/api/auth",
+  authRoutes
+);
 
 app.use(
   "/api/projects",
@@ -196,6 +211,15 @@ app.use(
 );
 
 // =========================
+// AKTU PAYMENT ROUTES
+// =========================
+
+app.use(
+  "/api/aktu-payment",
+  aktuPaymentRoutes
+);
+
+// =========================
 // ERROR HANDLER
 // =========================
 
@@ -208,6 +232,7 @@ app.use(
 
     res.status(500).json({
       message: "Server error",
+
       error:
         process.env.NODE_ENV ===
         "development"
@@ -216,5 +241,15 @@ app.use(
     });
   }
 );
+
+// =========================
+// START SERVER
+// =========================
+
+app.listen(PORT, () => {
+  console.log(
+    `✅ Server running on port ${PORT}`
+  );
+});
 
 export default app;

@@ -14,17 +14,15 @@ import adminAuthRoutes from "../routes/adminAuthRoutes.js";
 import adminProjectRoutes from "../routes/adminProjectRoutes.js";
 import freeProjectRoutes from "../routes/freeProjectRoutes.js";
 import adminFreeProjectRoutes from "../routes/adminFreeProjectRoutes.js";
+import uploadRoutes from "../routes/upload.routes.js";
 
-/* AKTU ROUTES */
 import aktuRoutes from "../routes/aktuRoutes.js";
 import adminAktuRoutes from "../routes/adminAktuRoutes.js";
 
 const app = express();
 
-/* DB */
 connectDB();
 
-/* Middleware */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -54,42 +52,45 @@ app.use(
 
 app.options("*", cors());
 
-/* HEALTH CHECK */
 app.get("/health", (req, res) => {
-  res.status(200).send("OK");
+  res.status(200).json({
+    success: true,
+    message: "CodeX API is running",
+  });
 });
 
-/* ROOT */
 app.get("/", (req, res) => {
   res.json({
     message: "CodeX API running",
   });
 });
 
-/* EXISTING ROUTES */
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/download", downloadRoutes);
 app.use("/api/contact", contactRoutes);
+
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
-app.use("/api/free-projects", freeProjectRoutes);
-app.use(
-  "/api/admin/free-projects",
-  adminFreeProjectRoutes
-);
 
-/* AKTU ROUTES */
+app.use("/api/free-projects", freeProjectRoutes);
+app.use("/api/admin/free-projects", adminFreeProjectRoutes);
+
+app.use("/api/upload", uploadRoutes);
+
 app.use("/api/aktu", aktuRoutes);
 app.use("/api/admin/aktu", adminAktuRoutes);
 
-/* ERROR HANDLER */
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("SERVER ERROR:", err);
 
   res.status(500).json({
     message: "Server error",
+    error:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : undefined,
   });
 });
 
