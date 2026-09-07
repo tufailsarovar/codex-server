@@ -10,15 +10,17 @@ export const getAllProjects = async (req, res) => {
     const filter = {};
     if (category) filter.category = category;
 
-    const projects = await Project.find(filter)
-      .sort({ createdAt: -1 })
-      .lean();
+    const projects = await Project.find(filter).sort({ createdAt: -1 }).lean();
 
     res.set("Cache-Control", "public, max-age=60");
     res.json(projects);
   } catch (error) {
-    console.error(error);
-    res.json([]);
+    console.error("GET PROJECTS ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch projects",
+      error: error.message,
+    });
   }
 };
 
@@ -89,7 +91,7 @@ export const updateProject = async (req, res) => {
           fullBundle: files?.fullBundle || "",
         },
       },
-      { new: true }
+      { new: true },
     );
 
     res.json(updatedProject);
