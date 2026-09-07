@@ -3,18 +3,27 @@ import mongoose from "mongoose";
 const projectSchema = new mongoose.Schema(
   {
     title: String,
+
     category: String,
+
     description: String,
+
     techStack: [String],
+
     itemPrices: {
       sourceCode: Number,
       ppt: Number,
       documentation: Number,
     },
+
     originalPrice: Number,
+
     price: Number,
-    videoUrl: String,
+
+    screenshotUrl: String,
+
     livePreviewUrl: String,
+
     files: {
       sourceCode: String,
       ppt: String,
@@ -22,11 +31,14 @@ const projectSchema = new mongoose.Schema(
       fullBundle: String,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-// ✅ INDEX (FIX)
+// INDEX
 projectSchema.index({ createdAt: -1 });
+
 projectSchema.index({ category: 1 });
 
 export default mongoose.model("Project", projectSchema);
