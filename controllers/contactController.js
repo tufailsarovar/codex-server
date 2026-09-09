@@ -10,13 +10,68 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const escapeHtml = (value = "") =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
 export const sendContact = async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body;
+    const {
+      name,
+      email,
+      subject,
+      message,
+    } = req.body;
 
     if (!name || !email || !subject || !message) {
       return res.status(400).json({
-        message: "All fields are required",
+        success: false,
+        message: "All fields are required.",
+      });
+    }
+
+    const cleanName = String(name).trim();
+    const cleanEmail = String(email).trim();
+    const cleanSubject = String(subject).trim();
+    const cleanMessage = String(message).trim();
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address.",
+      });
+    }
+
+    if (
+      !cleanName ||
+      !cleanSubject ||
+      !cleanMessage
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required.",
+      });
+    }
+
+    if (
+      !process.env.SUPPORT_SMTP_HOST ||
+      !process.env.SUPPORT_SMTP_USER ||
+      !process.env.SUPPORT_SMTP_PASS
+    ) {
+      console.error(
+        "SUPPORT SMTP environment variables are missing."
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Email service is not configured.",
       });
     }
 
@@ -29,60 +84,104 @@ export const sendContact = async (req, res) => {
 
       to: process.env.SUPPORT_SMTP_USER,
 
-      replyTo: email,
+      replyTo: cleanEmail,
 
-      subject: `CodeX Support: ${subject}`,
+      subject:
+        `CodeX Support: ${cleanSubject}`,
 
       text: `
-New Support Message
+NEW CODEX SUPPORT MESSAGE
 
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
+Name:
+${cleanName}
+
+Email:
+${cleanEmail}
+
+Subject:
+${cleanSubject}
 
 Message:
-${message}
+${cleanMessage}
       `.trim(),
 
       html: `
         <div style="
           font-family: Arial, sans-serif;
           max-width: 700px;
-          margin: auto;
-          padding: 25px;
-          color: #222;
+          margin: 0 auto;
+          padding: 24px;
+          background: #f8fafc;
+          color: #0f172a;
         ">
 
-          <h2 style="margin-bottom: 25px;">
-            New CodeX Support Message
-          </h2>
-
-          <p>
-            <strong>Name:</strong> ${name}
-          </p>
-
-          <p>
-            <strong>Email:</strong> ${email}
-          </p>
-
-          <p>
-            <strong>Subject:</strong> ${subject}
-          </p>
-
           <div style="
-            margin-top: 20px;
-            padding: 18px;
-            background: #f5f5f5;
-            border-radius: 10px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 24px;
           ">
-            <strong>Message:</strong>
+
+            <h2 style="
+              margin: 0 0 8px;
+              font-size: 22px;
+            ">
+              New CodeX Support Message
+            </h2>
 
             <p style="
-              margin-top: 10px;
-              white-space: pre-wrap;
+              margin: 0 0 22px;
+              color: #64748b;
+              font-size: 14px;
             ">
-              ${message}
+              A new message has been submitted through
+              the CodeX contact form.
             </p>
+
+            <div style="
+              padding: 16px;
+              background: #f8fafc;
+              border-radius: 10px;
+              border: 1px solid #e2e8f0;
+            ">
+
+              <p>
+                <strong>Name:</strong><br>
+                ${escapeHtml(cleanName)}
+              </p>
+
+              <p>
+                <strong>Email:</strong><br>
+                ${escapeHtml(cleanEmail)}
+              </p>
+
+              <p style="margin-bottom: 0;">
+                <strong>Subject:</strong><br>
+                ${escapeHtml(cleanSubject)}
+              </p>
+
+            </div>
+
+            <div style="
+              margin-top: 16px;
+              padding: 16px;
+              background: #eef2ff;
+              border-radius: 10px;
+              border: 1px solid #c7d2fe;
+            ">
+
+              <strong>Message</strong>
+
+              <p style="
+                margin: 10px 0 0;
+                white-space: pre-wrap;
+                line-height: 1.6;
+              ">
+                ${escapeHtml(cleanMessage)}
+              </p>
+
+            </div>
+
           </div>
 
         </div>
@@ -91,14 +190,18 @@ ${message}
 
     return res.status(200).json({
       success: true,
-      message: "Message sent successfully",
+      message: "Message sent successfully.",
     });
   } catch (error) {
-    console.error("SUPPORT SMTP ERROR:", error);
+    console.error(
+      "SUPPORT SMTP ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Email sending failed",
+      message:
+        "Unable to send your message right now. Please try again.",
     });
   }
 };
