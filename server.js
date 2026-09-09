@@ -20,6 +20,7 @@ import adminProjectRoutes from "./routes/adminProjectRoutes.js";
 import freeProjectRoutes from "./routes/freeProjectRoutes.js";
 import adminFreeProjectRoutes from "./routes/adminFreeProjectRoutes.js";
 import uploadRoutes from "./routes/upload.routes.js";
+import projectRequestRoutes from "./routes/projectRequestRoutes.js";
 
 // AKTU routes
 import aktuRoutes from "./routes/aktuRoutes.js";
@@ -154,6 +155,11 @@ app.use(
 app.use(
   "/api/projects",
   projectRoutes
+);
+
+app.use(
+  "/api/project-requests",
+  projectRequestRoutes
 );
 
 app.use(
