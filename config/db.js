@@ -16,7 +16,7 @@ export const connectDB = async () => {
     throw new Error("MONGO_URI is missing");
   }
 
-  // Already connected
+  // Reuse existing connection
   if (
     cached.conn &&
     mongoose.connection.readyState === 1
@@ -24,7 +24,7 @@ export const connectDB = async () => {
     return cached.conn;
   }
 
-  // Connection already in progress
+  // Reuse connection currently being established
   if (cached.promise) {
     return cached.promise;
   }
@@ -32,7 +32,7 @@ export const connectDB = async () => {
   cached.promise = mongoose
     .connect(process.env.MONGO_URI, {
       maxPoolSize: 10,
-      minPoolSize: 0,
+      minPoolSize: 1,
 
       serverSelectionTimeoutMS: 10000,
       connectTimeoutMS: 10000,

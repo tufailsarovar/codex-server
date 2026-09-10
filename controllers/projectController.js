@@ -18,10 +18,16 @@ export const getAllProjects = async (req, res) => {
     }
 
     const projects = await Project.find(filter)
+      .select(
+        "title category description techStack itemPrices originalPrice price screenshotUrl livePreviewUrl createdAt"
+      )
       .sort({ createdAt: -1 })
       .lean();
 
-    res.set("Cache-Control", "public, max-age=60");
+    res.set(
+      "Cache-Control",
+      "public, s-maxage=60, stale-while-revalidate=300"
+    );
 
     return res.status(200).json(projects);
   } catch (error) {
